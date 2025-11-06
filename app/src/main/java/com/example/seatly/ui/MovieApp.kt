@@ -19,7 +19,7 @@ fun MovieApp(modifier: Modifier){
             val movieViewModel: MovieViewModel = viewModel(factory = MovieViewModel.Factory)
             HomeScreen(
                 movieUiState = movieViewModel.movieUiState,
-                retryAction = movieViewModel::getMovieNowShow,
+                retryAction = movieViewModel::getNowShowingWithGenres,
                 contentPadding = it
             )
         }

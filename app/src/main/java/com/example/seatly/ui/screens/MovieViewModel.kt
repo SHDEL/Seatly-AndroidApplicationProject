@@ -1,6 +1,8 @@
 package com.example.seatly.ui.screens
 
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -13,9 +15,15 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.seatly.MovieShowNowApplication
 import com.example.seatly.data.MovieRepository
 import com.example.seatly.data.NetworkMovieRepository
+import com.example.seatly.model.GenreResponse
 import com.example.seatly.model.Movie
+import com.example.seatly.network.MovieApiService
 import kotlinx.coroutines.launch
 import java.io.IOException
+import java.text.DateFormat
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 
 sealed interface MovieUiState {
@@ -25,24 +33,61 @@ sealed interface MovieUiState {
 }
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 class MovieViewModel(private val movieRepository: MovieRepository) : ViewModel(){
     var movieUiState: MovieUiState by mutableStateOf(MovieUiState.Loading)
         private set
 
     init {
-        getMovieNowShow()
+//        getMovieNowShow()
+        getNowShowingWithGenres()
+
     }
 
-    fun getMovieNowShow() {
+//    fun getMovieNowShow() {
+//        viewModelScope.launch {
+//            movieUiState = MovieUiState.Loading
+//            movieUiState = try {
+//                MovieUiState.Success(movieRepository.getMovies())
+//            } catch (e: IOException) {
+//                MovieUiState.Error
+//            } catch (e: retrofit2.HttpException) {
+//                MovieUiState.Error
+//            }
+//        }
+//    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun getNowShowingWithGenres(){
         viewModelScope.launch {
             movieUiState = MovieUiState.Loading
-            movieUiState = try {
-                MovieUiState.Success(movieRepository.getMovies())
+            try {
+                val moviesResponse = movieRepository.getMovies()
+                val genresResponse = movieRepository.getGenres()
+                val genreMap = genresResponse.associate { it.id to it.name }
+
+                val moviesGenres = moviesResponse.map { movie ->
+                    val genreName = movie.genre.mapNotNull { genreMap[it]}
+                    val formattedDate = movie.releaseDate?.let { dateString ->
+                        try {
+                            val localDate = LocalDate.parse(dateString) // parse จาก yyyy-MM-dd
+                            localDate.format(
+                                DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.ENGLISH)
+                            )
+                        } catch (e: Exception) {
+                            null // ถ้าแปลงไม่ได้ก็ไม่พัง
+                        }
+                    }
+                    movie.copy(genreName = genreName, releaseDate = formattedDate)
+                }
+                movieUiState = MovieUiState.Success(moviesGenres)
+
             } catch (e: IOException) {
-                MovieUiState.Error
+                movieUiState = MovieUiState.Error
             } catch (e: retrofit2.HttpException) {
-                MovieUiState.Error
+                movieUiState = MovieUiState.Error
             }
+
         }
     }
 
