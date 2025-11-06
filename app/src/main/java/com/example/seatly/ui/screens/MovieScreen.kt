@@ -43,10 +43,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat.getString
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.example.seatly.R
 import com.example.seatly.model.Movie
 import com.example.seatly.ui.theme.SeatlyTheme
+import java.util.Date
 
 @Composable
 fun HomeScreen(
@@ -86,7 +89,7 @@ fun SuccessBody(
         OutlinedTextField(
             value = "",
             onValueChange = {},
-            label = { Text("Search") },
+            label = { Text(stringResource(R.string.search)) },
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search Icon") },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(30.dp)
@@ -107,7 +110,7 @@ fun SuccessBody(
                 modifier = Modifier.weight(1f),
                 shape = RoundedCornerShape(50),
                 colors = if (selectedTab == "Now Showing") ButtonDefaults.buttonColors(containerColor = Color.DarkGray) else ButtonDefaults.buttonColors(containerColor = Color.Transparent)
-            ) { Text("Now Showing",
+            ) { Text( text = stringResource(R.string.now_showing),
                 color = Color.White) }
 
             Button(
@@ -115,7 +118,8 @@ fun SuccessBody(
                 modifier = Modifier.weight(1f),
                 shape = RoundedCornerShape(50),
                 colors = if (selectedTab == "Coming Soon") ButtonDefaults.buttonColors(containerColor = Color.DarkGray) else ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-            ) { Text("Coming Soon") }
+            ) { Text(stringResource(R.string.coming_soon),
+                color = Color.White) }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -135,6 +139,7 @@ fun SuccessBody(
 
 @Composable
 fun MovieListItem(movie: Movie, imgPath: String, modifier: Modifier = Modifier) {
+    val rate = String.format("%.1f", movie.voteAverage)
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -160,6 +165,7 @@ fun MovieListItem(movie: Movie, imgPath: String, modifier: Modifier = Modifier) 
             )
 
             Column(modifier = Modifier.weight(1f)) {
+
                 Text(
                     text = movie.title.ifEmpty { "Spider" },
                     style = MaterialTheme.typography.titleLarge,
@@ -168,22 +174,22 @@ fun MovieListItem(movie: Movie, imgPath: String, modifier: Modifier = Modifier) 
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-//                    Icon(
-//                        imageVector = Icons.Default.Star,
-//                        contentDescription = "Rating",
-//                        tint = Color.Yellow,
-//                        modifier = Modifier.size(16.dp)
-//                    )
+                    Icon(
+                        imageVector = Icons.Default.Star,
+                        contentDescription = "Rating",
+                        tint = Color.Yellow,
+                        modifier = Modifier.size(16.dp)
+                    )
                     Spacer(modifier = Modifier.width(4.dp))
-//                    Text(
-//                        text = "${movie.vote_average.toString().take(3)} | 2h15m",
-//                        style = MaterialTheme.typography.bodyMedium,
-//                        color = Color.LightGray
-//                    )
+                    Text(
+                        text = "${rate} | ${movie.releaseDate}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.LightGray
+                    )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Sci-Fi",
+                    text = movie.genreName.joinToString(", "),
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.LightGray
                 )
@@ -192,7 +198,7 @@ fun MovieListItem(movie: Movie, imgPath: String, modifier: Modifier = Modifier) 
                     onClick = { /* TODO */ },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE50914)),
                     shape = RoundedCornerShape(25.dp),
-                    modifier = Modifier.align(Alignment.End)
+                    modifier = Modifier.align(Alignment.CenterHorizontally).fillMaxSize().padding(12.dp)
                 ) {
                     Text("Book Ticket",
                         color = Color.White)
@@ -226,7 +232,7 @@ fun ErrorScreen(retryAction: () -> Unit, modifier: Modifier = Modifier) {
 @Composable
 fun SuccessBodyPreview() {
     SeatlyTheme(darkTheme = true) {
-        val mockdata = List(5) { Movie(1, "Spider-Man: Across the Spider-Verse", "", "/8Vt6mWEReuy4Of61Lp5Sj7ShVvL.jpg", "", "", 8.4)}
+        val mockdata = List(5) { Movie(1, listOf(10,10),"Spider-Man: Across the Spider-Verse", "", "/8Vt6mWEReuy4Of61Lp5Sj7ShVvL.jpg", "", "05 Apr 2023", 8.64, listOf("Sci-fi", "Action"))}
         SuccessBody(mockdata)
     }
 }
