@@ -26,6 +26,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import com.example.seatly.ui.MovieApp
+import com.example.seatly.ui.screens.LoginScreen
+import com.example.seatly.ui.screens.ProfileScreen
 import com.example.seatly.ui.theme.SeatlyTheme
 
 class MainActivity : ComponentActivity() {
@@ -34,7 +36,13 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             SeatlyTheme(darkTheme = true) {
-                SeatlyApp()
+                var isLoggedIn by rememberSaveable { mutableStateOf(false) }
+
+                if (isLoggedIn) {
+                    SeatlyApp()
+                } else {
+                    LoginScreen(onLoginClick = { isLoggedIn = true })
+                }
             }
         }
     }
@@ -60,7 +68,10 @@ fun SeatlyApp() {
             }
         }
     ) { innerPadding ->
-        MovieApp(modifier = Modifier.padding(innerPadding))
+        when (currentDestination) {
+            AppDestinations.PROFILE -> ProfileScreen(modifier = Modifier.padding(innerPadding))
+            else -> MovieApp(modifier = Modifier.padding(innerPadding))
+        }
     }
 }
 
