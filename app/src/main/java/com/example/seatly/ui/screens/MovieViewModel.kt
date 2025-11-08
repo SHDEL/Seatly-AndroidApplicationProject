@@ -33,29 +33,30 @@ sealed interface MovieUiState {
 }
 
 
+
+
 @RequiresApi(Build.VERSION_CODES.O)
 class MovieViewModel(private val movieRepository: MovieRepository) : ViewModel(){
     var movieUiState: MovieUiState by mutableStateOf(MovieUiState.Loading)
         private set
 
+    var selectedTab by mutableStateOf("")
+        private set
+
     init {
-//        getMovieNowShow()
         getNowShowingWithGenres()
 
     }
 
-//    fun getMovieNowShow() {
-//        viewModelScope.launch {
-//            movieUiState = MovieUiState.Loading
-//            movieUiState = try {
-//                MovieUiState.Success(movieRepository.getMovies())
-//            } catch (e: IOException) {
-//                MovieUiState.Error
-//            } catch (e: retrofit2.HttpException) {
-//                MovieUiState.Error
-//            }
-//        }
-//    }
+    fun onTabSelect(tab: String) {
+        selectedTab = tab
+        if (selectedTab == "Now Showing") {
+            getNowShowingWithGenres()
+        }
+        else {
+            getComingWithGenres()
+        }
+    }
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun getNowShowingWithGenres(){
@@ -70,12 +71,12 @@ class MovieViewModel(private val movieRepository: MovieRepository) : ViewModel()
                     val genreName = movie.genre.mapNotNull { genreMap[it]}
                     val formattedDate = movie.releaseDate?.let { dateString ->
                         try {
-                            val localDate = LocalDate.parse(dateString) // parse จาก yyyy-MM-dd
+                            val localDate = LocalDate.parse(dateString)
                             localDate.format(
                                 DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.ENGLISH)
                             )
                         } catch (e: Exception) {
-                            null // ถ้าแปลงไม่ได้ก็ไม่พัง
+                            null
                         }
                     }
                     movie.copy(genreName = genreName, releaseDate = formattedDate)
@@ -83,6 +84,39 @@ class MovieViewModel(private val movieRepository: MovieRepository) : ViewModel()
                 movieUiState = MovieUiState.Success(moviesGenres)
 
             } catch (e: IOException) {
+                movieUiState = MovieUiState.Error
+            } catch (e: retrofit2.HttpException) {
+                movieUiState = MovieUiState.Error
+            }
+
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun getComingWithGenres(){
+        viewModelScope.launch {
+            movieUiState = MovieUiState.Loading
+            try {
+                val movieResponse = movieRepository.getComingSoon()
+                val genresResponse = movieRepository.getGenres()
+                val genreMap = genresResponse.associate { it.id to it.name }
+
+                val moviesGenres = movieResponse.map { movie ->
+                    val genreName = movie.genre.mapNotNull { genreMap[it] }
+                        val formattedDate = movie.releaseDate?.let { dateString ->
+                            try {
+                                val localDate = LocalDate.parse(dateString)
+                                localDate.format(
+                                    DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.ENGLISH)
+                                )
+                            } catch (e: Exception) {
+                                null
+                            }
+                        }
+                        movie.copy(genreName = genreName, releaseDate = formattedDate)
+                }
+                movieUiState = MovieUiState.Success(moviesGenres)
+            }catch (e: IOException) {
                 movieUiState = MovieUiState.Error
             } catch (e: retrofit2.HttpException) {
                 movieUiState = MovieUiState.Error

@@ -12,6 +12,8 @@ interface MovieApiService {
     @GET("genre/movie/list")
     suspend fun getGenres(): GenreResponse
 
+    @GET("movie/upcoming")
+    suspend fun getComingSoon(): MovieResponse
 
 
 }

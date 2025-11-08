@@ -7,6 +7,8 @@ import com.example.seatly.network.MovieApiService
 interface MovieRepository {
     suspend fun getMovies(): List<Movie>
     suspend fun getGenres(): List<Genre>
+
+    suspend fun getComingSoon(): List<Movie>
 }
 
 class NetworkMovieRepository(private val movieApiService : MovieApiService): MovieRepository{
@@ -16,5 +18,9 @@ class NetworkMovieRepository(private val movieApiService : MovieApiService): Mov
 
     override suspend fun getGenres(): List<Genre> {
         return movieApiService.getGenres().genres
+    }
+
+    override suspend fun getComingSoon(): List<Movie> {
+        return movieApiService.getComingSoon().results
     }
 }
