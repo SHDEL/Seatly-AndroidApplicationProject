@@ -20,7 +20,6 @@ data class Movie(
     @SerialName("vote_average")
     val voteAverage: Double? = null,
 
-
     val genreName: List<String> = emptyList()
 
 )

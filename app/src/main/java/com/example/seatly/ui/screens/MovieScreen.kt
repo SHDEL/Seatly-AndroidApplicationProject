@@ -3,6 +3,7 @@ package com.example.seatly.ui.screens
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -57,6 +58,7 @@ import com.example.seatly.ui.theme.SeatlyTheme
 fun HomeScreen(
     movieViewModel: MovieViewModel,
     retryAction: () -> Unit,
+    onMovieClick: (Movie) -> Unit,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
@@ -66,6 +68,7 @@ fun HomeScreen(
         onNowShowingClick = { movieViewModel.getNowShowingWithGenres() },
         onComingSoonClick = { movieViewModel.getComingWithGenres() },
         retryAction = retryAction,
+        onMovieClick = onMovieClick,
         modifier = modifier,
         contentPadding = contentPadding
     )
@@ -79,6 +82,7 @@ fun HomeScreenBody(
     onNowShowingClick: () -> Unit,
     onComingSoonClick: () -> Unit,
     retryAction: () -> Unit,
+    onMovieClick: (Movie) -> Unit,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp)
 ) {
@@ -158,6 +162,7 @@ fun HomeScreenBody(
             is MovieUiState.Loading -> LoadingScreen(modifier = Modifier.fillMaxSize())
             is MovieUiState.Success -> MovieList(
                 movies = movieUiState.movies,
+                onMovieClick = onMovieClick,
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = contentPadding
             )
@@ -169,6 +174,7 @@ fun HomeScreenBody(
 @Composable
 fun MovieList(
     movies: List<Movie>,
+    onMovieClick: (Movie) -> Unit,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp)
 ) {
@@ -179,13 +185,13 @@ fun MovieList(
     ) {
         items(movies) {
             val imgPath = "https://image.tmdb.org/t/p/w500/" + it.poster
-            MovieListItem(movie = it, imgPath = imgPath)
+            MovieListItem(movie = it, imgPath = imgPath, onMovieClick = onMovieClick)
         }
     }
 }
 
 @Composable
-fun MovieListItem(movie: Movie, imgPath: String, modifier: Modifier = Modifier) {
+fun MovieListItem(movie: Movie, imgPath: String, onMovieClick: (Movie) -> Unit, modifier: Modifier = Modifier) {
     val rate = String.format("%.1f", movie.voteAverage)
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -242,13 +248,14 @@ fun MovieListItem(movie: Movie, imgPath: String, modifier: Modifier = Modifier) 
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 Button(
-                    onClick = { /* TODO */ },
+                    onClick = { onMovieClick(movie) },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE50914)),
                     shape = RoundedCornerShape(25.dp),
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
                         .fillMaxSize()
                         .padding(12.dp)
+
                 ) {
                     Text("Book Ticket",
                         color = Color.White)
@@ -313,7 +320,8 @@ fun HomeScreenPreview() {
             movieUiState = MovieUiState.Success(mockMovies),
             onNowShowingClick = { },
             onComingSoonClick = { },
-            retryAction = { }
+            retryAction = { },
+            onMovieClick = { }
         )
     }
 }

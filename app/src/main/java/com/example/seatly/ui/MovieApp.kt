@@ -12,21 +12,21 @@ import com.example.seatly.ui.screens.HomeScreen
 import com.example.seatly.ui.screens.MovieViewModel
 
 
-@RequiresApi(Build.VERSION_CODES.O)
-@Composable
-fun MovieApp(modifier: Modifier){
-    Scaffold(modifier) {
-        Surface(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            val movieViewModel: MovieViewModel = viewModel(factory = MovieViewModel.Factory)
-            HomeScreen(
-                movieViewModel = movieViewModel,
-                retryAction = movieViewModel::getNowShowingWithGenres,
-                contentPadding = it
-            )
-        }
-
-    }
-}
+//@RequiresApi(Build.VERSION_CODES.O)
+//@Composable
+//fun MovieApp(modifier: Modifier){
+//    Scaffold(modifier) {
+//        Surface(
+//            modifier = Modifier.fillMaxSize()
+//        ) {
+//            val movieViewModel: MovieViewModel = viewModel(factory = MovieViewModel.Factory)
+////            HomeScreen(
+////                movieViewModel = movieViewModel,
+////                retryAction = movieViewModel::getNowShowingWithGenres,
+////                contentPadding = it
+////            )
+//        }
+//
+//    }
+//}
 
