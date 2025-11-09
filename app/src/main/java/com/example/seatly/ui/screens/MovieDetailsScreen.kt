@@ -63,9 +63,9 @@ import java.util.Calendar
 import java.util.Locale
 
 val mockCinemas = listOf(
-    Cinema("Cineplex Major", listOf("10:00", "13:00", "16:00", "19:00", "22:00")),
-    Cinema("SF Cinema", listOf("11:30", "14:30", "17:30", "20:30")),
-    Cinema("Embassy Diplomat Screens", listOf("12:00", "15:00", "18:00", "21:00"))
+    Cinema("Hall 1", listOf("10:00", "13:00", "16:00", "19:00", "22:00")),
+    Cinema("Hall 2", listOf("11:30", "14:30", "17:30", "20:30")),
+    Cinema("Hall 3", listOf("12:00", "15:00", "18:00", "21:00"))
 )
 // Mock data for dates
 @RequiresApi(Build.VERSION_CODES.O)
@@ -83,7 +83,7 @@ fun getNext7Days(): List<Pair<String, String>> {
 @OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun MovieDetailsScreen(movie: Movie, onBackClick: () -> Unit, onNextClick: (Int) -> Unit) {
+fun MovieDetailsScreen(movie: Movie, onBackClick: () -> Unit, onNextClick: (movieId: Int, date: String, time: String, hall: String) -> Unit) {
     val rate = String.format("%.1f", movie.voteAverage)
     var selectedDateIndex by remember { mutableStateOf(0) }
     val dates = getNext7Days()
@@ -190,7 +190,7 @@ fun MovieDetailsScreen(movie: Movie, onBackClick: () -> Unit, onNextClick: (Int)
             // Cinema Selector
             Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                 Text(
-                    "Select Cinema",
+                    "Select Hall",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
@@ -285,7 +285,14 @@ fun MovieDetailsScreen(movie: Movie, onBackClick: () -> Unit, onNextClick: (Int)
             Spacer(modifier = Modifier.weight(1f))
             // Select Seats Button
             Button(
-                onClick = { onNextClick(movie.id) },
+                onClick = { 
+                    val (day, date) = dates[selectedDateIndex]
+                    val formattedDate = "$day, $date"
+                    selectedTime?.let { time ->
+                        onNextClick(movie.id, formattedDate, time, selectedCinema.name)
+                    } 
+                },
+                enabled = selectedTime != null,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
@@ -337,6 +344,6 @@ fun MovieDetailsScreenPreview() {
             voteAverage = 8.4,
             genreName = listOf("Action", "Adventure", "Animation", "Science Fiction")
         )
-        MovieDetailsScreen(movie = mockMovie, onBackClick = {}, onNextClick = {})
+        MovieDetailsScreen(movie = mockMovie, onBackClick = {}, onNextClick = {_, _, _, _ -> })
     }
 }

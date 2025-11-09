@@ -2,6 +2,7 @@ package com.example.seatly.ui.screens
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -13,8 +14,10 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.seatly.MovieShowNowApplication
 import com.example.seatly.data.MovieRepository
+import com.example.seatly.model.Booking
 import com.example.seatly.model.Genre
 import com.example.seatly.model.Movie
+import com.example.seatly.model.Ticket
 import kotlinx.coroutines.launch
 import java.io.IOException
 
@@ -30,6 +33,12 @@ class MovieViewModel(private val movieRepository: MovieRepository) : ViewModel()
 
     var movieUiState: MovieUiState by mutableStateOf(MovieUiState.Loading)
         private set
+    
+    var bookingState: Booking? by mutableStateOf(null)
+        private set
+
+    private val _tickets = mutableStateOf<List<Ticket>>(emptyList())
+    val tickets: State<List<Ticket>> = _tickets
 
     private var nowShowingMovies: List<Movie> = emptyList()
     private var comingSoonMovies: List<Movie> = emptyList()
@@ -37,6 +46,15 @@ class MovieViewModel(private val movieRepository: MovieRepository) : ViewModel()
 
     init {
         getNowShowingWithGenres()
+    }
+
+    fun setBooking(booking: Booking){
+        bookingState = booking
+    }
+
+    fun addTicket(movie: Movie, booking: Booking) {
+        val newTicket = Ticket(movie = movie, booking = booking)
+        _tickets.value = _tickets.value + newTicket
     }
 
     fun getMovieById(movieId: Int?): Movie? {

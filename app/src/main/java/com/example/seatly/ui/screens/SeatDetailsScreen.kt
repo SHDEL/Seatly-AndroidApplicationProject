@@ -20,11 +20,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.seatly.model.Booking
 import com.example.seatly.model.Movie
 import com.example.seatly.model.Seat
 import com.example.seatly.model.SeatStatus
 import com.example.seatly.ui.theme.SeatlyTheme
 
+// 3. สร้างข้อมูลจำลองของที่นั่ง
 private fun generateDummySeats(): List<Seat> {
     val seats = mutableListOf<Seat>()
     val rows = 10
@@ -44,17 +46,33 @@ private fun generateDummySeats(): List<Seat> {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SeatDetailsScreen(movie: Movie, onBackClick: () -> Unit) {
+fun SeatDetailsScreen(
+    movie: Movie,
+    date: String,
+    time: String,
+    hall: String,
+    onBackClick: () -> Unit,
+    onNextClick: (Booking) -> Unit
+) {
     var seats by remember { mutableStateOf(generateDummySeats()) }
     val selectedSeats = seats.filter { it.status == SeatStatus.Selected }
-    val pricePerSeat = 150
-    val totalPrice = selectedSeats.size * pricePerSeat
+    val pricePerSeat = 150.0
+    val bookingFee = 10.0
+    val taxes = 5.0
+    val subtotal = selectedSeats.size * pricePerSeat
+    val totalPrice = subtotal + bookingFee + taxes
 
     // Create a string of selected seat names
     val selectedSeatNames = selectedSeats.joinToString(", ") {
         val rowChar = ('A'.code + it.row - 1).toChar()
         "$rowChar${it.number}"
     }
+    val selectedRow = if (selectedSeats.isNotEmpty()) {
+        ('A'.code + selectedSeats.first().row - 1).toChar().toString()
+    } else {
+        ""
+    }
+
 
     Scaffold(
         containerColor = Color.Black, // Match other screens
@@ -118,7 +136,24 @@ fun SeatDetailsScreen(movie: Movie, onBackClick: () -> Unit) {
                 Spacer(modifier = Modifier.height(12.dp))
                 // Themed Button
                 Button(
-                    onClick = { /* Handle Next button click */ },
+                    onClick = { 
+                        val booking = Booking(
+                            hall = hall,
+                            date = date,
+                            time = time,
+                            row = selectedRow,
+                            seats = selectedSeatNames,
+                            posterUrl = movie.poster,
+                            priceItems = listOf(
+                                "Tickets (${selectedSeats.size})" to subtotal,
+                                "Booking Fee" to bookingFee,
+                                "Taxes" to taxes
+                            ),
+                            total = totalPrice,
+                            paymentMask = "Visa •••• 1234"
+                        )
+                        onNextClick(booking) 
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp),
@@ -221,6 +256,6 @@ fun SeatDetailsScreenPreview() {
             voteAverage = 8.4,
             genreName = listOf("Action", "Adventure")
         )
-        SeatDetailsScreen(movie = mockMovie, onBackClick = {})
+        SeatDetailsScreen(movie = mockMovie, date = "Dec 23, 2024", time = "14:30", hall = "Hall 1", onBackClick = {}, onNextClick = {})
     }
 }
