@@ -33,8 +33,10 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.seatly.ui.screens.HomeScreen
+import com.example.seatly.ui.screens.LoginScreen
 import com.example.seatly.ui.screens.MovieDetailsScreen
 import com.example.seatly.ui.screens.MovieViewModel
+import com.example.seatly.ui.screens.ProfileScreen
 import com.example.seatly.ui.screens.SeatDetailsScreen
 import com.example.seatly.ui.theme.SeatlyTheme
 
@@ -63,44 +65,62 @@ class MainActivity : ComponentActivity() {
 fun SeatlyApp() {
     val navController = rememberNavController()
     val movieViewModel: MovieViewModel = viewModel(factory = MovieViewModel.Factory)
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = navBackStackEntry?.destination
+    val showBottomBar = currentDestination?.route != "login"
 
     Scaffold(
         bottomBar = {
-            NavigationBar {
-                val navBackStackEntry by navController.currentBackStackEntryAsState()
-                val currentDestination = navBackStackEntry?.destination
-                NavigationBarItem(
-                    selected = currentDestination?.hierarchy?.any { it.route == "home" } == true,
-                    onClick = { navController.navigate("home") { popUpTo(navController.graph.findStartDestination().id) { saveState = true }; launchSingleTop = true; restoreState = true } },
-                    icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
-                    label = { Text("Home") },
-                )
-                NavigationBarItem(
-                    selected = false, // TODO: Update when search screen is available
-                    onClick = { /* TODO */ },
-                    icon = { Icon(Icons.Default.Search, contentDescription = "Search") },
-                    label = { Text("Search") }
-                )
-                NavigationBarItem(
-                    selected = false, // TODO: Update when tickets screen is available
-                    onClick = { /* TODO */ },
-                    icon = { Icon(Icons.Default.ConfirmationNumber, contentDescription = "Tickets") },
-                    label = { Text("Tickets") }
-                )
-                NavigationBarItem(
-                    selected = false, // TODO: Update when profile screen is available
-                    onClick = { /* TODO */ },
-                    icon = { Icon(Icons.Default.Person, contentDescription = "Profile") },
-                    label = { Text("Profile") }
-                )
+            if (showBottomBar) {
+                NavigationBar {
+                    NavigationBarItem(
+                        selected = currentDestination?.hierarchy?.any { it.route == "home" } == true,
+                        onClick = { 
+                            if (currentDestination?.route != "home"){
+                                navController.navigate("home") { popUpTo(navController.graph.findStartDestination().id) { saveState = true }; launchSingleTop = true; restoreState = true } 
+                            }
+                        },
+                        icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
+                        label = { Text("Home") },
+                    )
+                    NavigationBarItem(
+                        selected = false, // TODO: Update when search screen is available
+                        onClick = { /* TODO */ },
+                        icon = { Icon(Icons.Default.Search, contentDescription = "Search") },
+                        label = { Text("Search") }
+                    )
+                    NavigationBarItem(
+                        selected = false, // TODO: Update when tickets screen is available
+                        onClick = { /* TODO */ },
+                        icon = { Icon(Icons.Default.ConfirmationNumber, contentDescription = "Tickets") },
+                        label = { Text("Tickets") }
+                    )
+                    NavigationBarItem(
+                        selected = currentDestination?.hierarchy?.any { it.route == "profile" } == true,
+                        onClick = { 
+                            if (currentDestination?.route != "profile"){
+                                navController.navigate("profile") { popUpTo(navController.graph.findStartDestination().id) { saveState = true }; launchSingleTop = true; restoreState = true } 
+                            }
+                        },
+                        icon = { Icon(Icons.Default.Person, contentDescription = "Profile") },
+                        label = { Text("Profile") }
+                    )
+                }
             }
         }
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = "home",
+            startDestination = "login", // Start at login screen
             modifier = Modifier.padding(innerPadding)
         ) {
+            composable("login") {
+                LoginScreen(onLoginClick = {
+                    navController.navigate("home") {
+                        popUpTo("login") { inclusive = true }
+                    }
+                })
+            }
             composable("home") {
                 HomeScreen(
                     movieViewModel = movieViewModel,
@@ -114,16 +134,15 @@ fun SeatlyApp() {
             composable(
                 route = "details/{movieId}",
                 arguments = listOf(navArgument("movieId") { type = NavType.IntType })
-            ) {
-                backStackEntry ->
+            ) { backStackEntry ->
                 val movieId = backStackEntry.arguments?.getInt("movieId")
                 val movie = movieViewModel.getMovieById(movieId)
                 if (movie != null) {
                     MovieDetailsScreen(
                         movie = movie,
                         onBackClick = { navController.popBackStack() },
-                        onNextClick = {
-                            navController.navigate("seats/${movie.id}")
+                        onNextClick = { movie_id ->
+                            navController.navigate("seats/$movie_id")
                         }
                     )
                 }
@@ -131,8 +150,7 @@ fun SeatlyApp() {
             composable(
                 route = "seats/{movieId}",
                 arguments = listOf(navArgument("movieId") { type = NavType.IntType })
-            ){
-                    backStackEntry ->
+            ) { backStackEntry ->
                 val movieId = backStackEntry.arguments?.getInt("movieId")
                 val movie = movieViewModel.getMovieById(movieId)
                 if (movie != null) {
@@ -141,6 +159,11 @@ fun SeatlyApp() {
                         onBackClick = { navController.popBackStack() }
                     )
                 }
+            }
+            composable("profile") {
+                ProfileScreen(
+                    modifier = Modifier
+                )
             }
         }
     }

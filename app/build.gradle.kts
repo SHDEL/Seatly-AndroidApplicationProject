@@ -29,8 +29,8 @@ android {
             properties.load(FileInputStream(localPropertiesFile))
         }
 
-        buildConfigField("String", "API_KEY", properties.getProperty("API_KEY"))
-        buildConfigField("String", "API_URL", properties.getProperty("API_URL"))
+        buildConfigField("String", "API_KEY", properties.getProperty("API_KEY") ?: "\"\"")
+        buildConfigField("String", "API_URL", properties.getProperty("API_URL") ?: "\"\"")
     }
 
     buildTypes {
