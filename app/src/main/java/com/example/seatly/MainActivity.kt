@@ -25,8 +25,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
+import com.example.seatly.data.Booking
+import com.example.seatly.model.Movie
 import com.example.seatly.ui.MovieApp
 import com.example.seatly.ui.theme.SeatlyTheme
+import com.example.seatly.ui.screens.BookingSummaryScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,8 +63,19 @@ fun SeatlyApp() {
             }
         }
     ) { innerPadding ->
-        MovieApp(modifier = Modifier.padding(innerPadding))
+//        MovieApp(modifier = Modifier.padding(innerPadding))
+        BookingSummaryScreen(
+            movie = Movie(1, "Spider", "", "/poster.jpg", "", "", 8.4),
+            booking = Booking.sample(),
+            modifier = Modifier.padding(innerPadding)
+        )
     }
+
+//    BookingSummaryScreen(
+//        movie = Movie(1, "Spider", "", "/poster.jpg", "", "", 8.4),
+//        booking = Booking.sample(),
+//        modifier = Modifier.fillMaxSize()
+//    )
 }
 
 enum class AppDestinations(
