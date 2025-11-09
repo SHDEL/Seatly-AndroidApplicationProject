@@ -67,6 +67,9 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended:1.7.8")
     implementation(libs.androidx.compose.material3.adaptive.navigation.suite)
 
+    // Navigation
+    implementation("androidx.navigation:navigation-compose:2.9.6")
+
     // Retrofit
     implementation(libs.retrofit)
 
@@ -82,6 +85,7 @@ dependencies {
     implementation(libs.coil.compose)
 
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.material3)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

@@ -6,6 +6,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Movie(
     val id: Int,
+    @SerialName("genre_ids")
+    val genre: List<Int> = emptyList(),
     val title: String,
     val overview: String,
 
@@ -16,7 +18,9 @@ data class Movie(
     @SerialName("release_date")
     val releaseDate: String? = null,
     @SerialName("vote_average")
-    val voteAverage: Double? = null
+    val voteAverage: Double? = null,
+
+    val genreName: List<String> = emptyList()
 
 )
 
